@@ -170,16 +170,6 @@ class Form extends \Magento\Backend\Block\Widget\Form\Generic
         } else {
             $regions = [['value' => '', 'label' => '*']];
         }
-        $allowCountry = [
-            [
-                'value' => 'all-country',
-                'label' => 'All Countries'
-            ],
-            [
-                'value' => 'special-country',
-                'label' => 'Special Country'
-            ]
-        ];
         $legend = $this->getShowLegend() ? __('Tax Rate Information') : '';
         $fieldset = $form->addFieldset(
             'base_fieldset',
@@ -265,12 +255,12 @@ class Form extends \Magento\Backend\Block\Widget\Form\Generic
             ['name' => 'tax_region_id', 'label' => __('State'), 'values' => $regions]
         );
         $fieldset->addField(
-            'tax_allow_country',
-            'select',
+            'tax_allow_stores',
+            'multiselect',
             [
-                'name' => 'tax_allow_country',
-                'label' => __('Allow Countries'),
-                'values' =>$allowCountry,
+                'name' => 'tax_allow_stores',
+                'label' => __('Allow Stores'),
+                'values' => $this->getStoreOptions(),
                 'required' => true,
             ]
         );
@@ -325,5 +315,17 @@ class Form extends \Magento\Backend\Block\Widget\Form\Generic
         );
 
         return parent::_prepareForm();
+    }
+    protected function getStoreOptions()
+    {
+        $stores = $this->_storeManager->getStores();
+        $options = [];
+        foreach ($stores as $store) {
+            $options[] = [
+                'value' => $store->getCode(),
+                'label' => $store->getName()
+            ];
+        }
+        return $options;
     }
 }

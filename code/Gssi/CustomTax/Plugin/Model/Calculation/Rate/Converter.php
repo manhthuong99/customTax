@@ -9,8 +9,8 @@ class Converter
         if (@$formData['custom_number_tax']) {
             $result->setData('custom_number_tax', $formData['custom_number_tax']);
         }
-        if (@$formData['tax_allow_country']) {
-            $result->setData('tax_allow_country', $formData['tax_allow_country']);
+        if (@$formData['tax_allow_stores']) {
+            $result->setData('tax_allow_stores', implode(',', $formData['tax_allow_stores']));
         }
         return $result;
     }

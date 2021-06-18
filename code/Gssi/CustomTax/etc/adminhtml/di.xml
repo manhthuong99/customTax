@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <preference for="Magento\Tax\Block\Adminhtml\Rate\Form"
-                type="Gssi\CustomTax\Block\Adminhtml\Rate\Form"/>
+    <preference for="Magento\Tax\Block\Adminhtml\Rate\Form" type="Gssi\CustomTax\Block\Adminhtml\Rate\Form"/>
     <type name="Magento\Tax\Model\Calculation\Rate\Converter">
         <plugin name="Gssi_CustomTax::PopulateTaxRateData" type="Gssi\CustomTax\Plugin\Model\Calculation\Rate\Converter"/>
     </type>
+    <preference for="Magento\TaxImportExport\Model\Rate\CsvImportHandler" type="Gssi\CustomTax\Model\Rate\CsvImportHandler"/>
 </config>

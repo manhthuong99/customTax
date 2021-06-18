@@ -1,11 +1,15 @@
 <?php
 
-namespace Gssi\CustomTax\Plugin\Model\ResourceModel;
+namespace Gssi\CustomTax\Model\ResourceModel;
 
 class Calculation extends \Magento\Tax\Model\ResourceModel\Calculation
 {
-    const USA_COUNTRY_CODE = 'US';
-    private $session;
+    const FIRST_POSITION = 0;
+    /**
+     * @var \Magento\Customer\Model\Session
+     */
+    protected $session;
+
     public function __construct(
         \Magento\Framework\Model\ResourceModel\Db\Context $context,
         \Magento\Tax\Helper\Data $taxData,
@@ -17,24 +21,39 @@ class Calculation extends \Magento\Tax\Model\ResourceModel\Calculation
         parent::__construct($context, $taxData, $storeManager, $connectionName);
     }
 
-    public function afterGetRateInfo(\Magento\Tax\Model\ResourceModel\Calculation $subject, $result, $request)
+    public function getRateInfo($request)
     {
-        $customer = $this->session->getCustomer();
         $rates = $this->_getRates($request);
+        if ($this->session->isLoggedIn()) {
+            $customer = $this->session->getCustomer();
+            foreach ($rates as $rateIndex => $rate) {
+                $allowStores = $rate['tax_allow_stores'];
+                if ($allowStores) {
+                    $allowStores = explode(',', $allowStores);
+                    $storeCode = $this->_storeManager->getStore()->getCode();
+                    if (in_array($storeCode, $allowStores)) {
+                        $customerTaxCode = explode('*', $rate['custom_number_tax']);
+                        if (isset($customerTaxCode[0])) {
+                            $checkTaxCode = strpos($customer->getData('taxvat'), $customerTaxCode[0]);
+                            if ($checkTaxCode !== false) {
+                                if ($checkTaxCode !== self::FIRST_POSITION) {
+                                    unset($rates[$rateIndex]);
+                                }
+                            } else {
+                                unset($rates[$rateIndex]);
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
         return [
             'process' => $this->getCalculationProcess($request, $rates),
             'value' => $this->_calculateRate($rates)
         ];
-        if ($this->session->isLoggedIn() && $customer->getData('taxvat')) {
-//            $connection = $this->resource->getConnection();
-            /*  $select = $connection->select()->from(
-                  ['tc' => $connection->getTableName('tax_calculation_rate')],
-                   ['custom_number_tax'])
-                  ->where('tax_calculation_rate_id = ?', $request->getId());*/
-            // $connection->fetchCol($select,['']);
-        }
-        return $result;
     }
+
     protected function _getRates($request)
     {
         // Extract params that influence our SELECT statement and use them to create cache key
@@ -97,7 +116,9 @@ class Calculation extends \Magento\Tax\Model\ResourceModel\Calculation
                     'rate.tax_region_id',
                     'rate.tax_postcode',
                     'rate.tax_calculation_rate_id',
-                    'rate.code'
+                    'rate.code',
+                    'rate.custom_number_tax',
+                    'rate.tax_allow_stores'
                 ]
             )->joinLeft(
                 ['title_table' => $this->getTable('tax_calculation_rate_title')],

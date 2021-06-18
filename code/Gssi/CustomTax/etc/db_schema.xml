@@ -9,6 +9,6 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
     <table name="tax_calculation_rate" resource="default" engine="innodb" comment="Custom Pricing Tier Price">
         <column xsi:type="varchar" name="custom_number_tax" nullable="true" length="64" comment="Custom Number Tax"/>
-        <column xsi:type="varchar" name="tax_allow_country" nullable="true" length="64" comment="Allow Countries"/>
+        <column xsi:type="varchar" name="tax_allow_stores" nullable="true" length="64" comment="Allow Stores"/>
     </table>
 </schema>
